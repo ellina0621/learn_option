@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>選擇權學院 · Options Academy</title>
+<style>
+  :root{
+    --bg:#131722;
+    --panel:#1e222d;
+    --panel2:#181b26;
+    --border:#2a2e39;
+    --text:#d1d4dc;
+    --text-dim:#787b86;
+    --text-bright:#eef0f4;
+    --blue:#2962ff;
+    --blue-dim:#1e3a8a;
+    --green:#089981;
+    --green-bg:rgba(8,153,129,.12);
+    --red:#f23645;
+    --red-bg:rgba(242,54,69,.12);
+    --orange:#ff9800;
+    --purple:#9c64ff;
+    --yellow:#ffb800;
+    --mono:'IBM Plex Mono','Roboto Mono',Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Microsoft JhengHei',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:14px;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--blue-dim); color:#fff;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:var(--panel2);}
+  ::-webkit-scrollbar-thumb{background:#363a45; border-radius:5px;}
+  ::-webkit-scrollbar-thumb:hover{background:#434651;}
+
+  /* ===== Top bar ===== */
+  .topbar{
+    height:52px;
+    background:var(--panel2);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    padding:0 18px;
+    gap:14px;
+    position:sticky; top:0; z-index:100;
+  }
+  .topbar .logo{
+    display:flex; align-items:center; gap:8px;
+    font-weight:700; font-size:16px; color:var(--text-bright);
+    letter-spacing:.3px;
+  }
+  .logo .mark{
+    width:26px; height:26px; border-radius:6px;
+    background:linear-gradient(135deg,var(--blue),var(--purple));
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:900; color:#fff;
+  }
+  .topbar .sub{color:var(--text-dim); font-size:12px; padding-left:8px; border-left:1px solid var(--border);}
+  .topbar .ticker{
+    margin-left:auto; display:flex; gap:18px; font-family:var(--mono); font-size:12px;
+  }
+  .ticker .t-item{display:flex; flex-direction:column; align-items:flex-end; gap:2px;}
+  .ticker .t-label{color:var(--text-dim); font-size:10px;}
+  .ticker .t-val{color:var(--text-bright); font-weight:600;}
+  .ticker .up{color:var(--green);}
+  .ticker .down{color:var(--red);}
+
+  /* ===== Layout ===== */
+  .layout{display:flex; min-height:calc(100vh - 52px);}
+  .sidebar{
+    width:240px; flex:0 0 240px;
+    background:var(--panel2);
+    border-right:1px solid var(--border);
+    padding:14px 0;
+    position:sticky; top:52px; height:calc(100vh - 52px); overflow-y:auto;
+  }
+  .nav-group{margin-bottom:6px;}
+  .nav-title{
+    font-size:11px; color:var(--text-dim); text-transform:uppercase;
+    letter-spacing:1px; padding:10px 18px 6px; font-weight:700;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 18px; cursor:pointer; color:var(--text);
+    font-size:13.5px; border-left:3px solid transparent;
+    transition:.12s;
+  }
+  .nav-item .dot{width:6px; height:6px; border-radius:50%; background:var(--text-dim); flex:0 0 6px;}
+  .nav-item:hover{background:rgba(255,255,255,.03); color:var(--text-bright);}
+  .nav-item.active{background:rgba(41,98,255,.1); border-left-color:var(--blue); color:var(--text-bright); font-weight:600;}
+  .nav-item.active .dot{background:var(--blue);}
+
+  .main{flex:1; min-width:0; padding:28px 36px 80px; max-width:1180px;}
+  .panel{display:none;}
+  .panel.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .panel-header{margin-bottom:26px; padding-bottom:16px; border-bottom:1px solid var(--border);}
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; color:var(--blue); letter-spacing:1.5px;
+    text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow .bar{width:18px; height:2px; background:var(--blue); display:inline-block;}
+  h1{font-size:26px; color:var(--text-bright); font-weight:800; letter-spacing:-.3px;}
+  h1 .symbol{font-family:var(--mono); color:var(--text-dim); font-weight:500; font-size:16px; margin-left:10px;}
+  .tagline{color:var(--text-dim); font-size:14px; margin-top:8px; max-width:680px;}
+
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:20px 22px; margin-bottom:18px;
+  }
+  .card h2{font-size:16px; color:var(--text-bright); margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .card h2 .icon-sq{
+    width:22px; height:22px; border-radius:5px; background:var(--blue-dim);
+    display:flex; align-items:center; justify-content:center; font-size:12px; color:#9db4ff; font-family:var(--mono);
+  }
+  .card p{margin-bottom:10px; color:var(--text);}
+  .card p:last-child{margin-bottom:0;}
+  .muted{color:var(--text-dim);}
+
+  .grid2{display:grid; grid-template-columns:1.1fr 1fr; gap:18px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;}}
+
+  .formula{
+    font-family:var(--mono); background:var(--panel2); border:1px solid var(--border);
+    border-radius:6px; padding:12px 16px; color:#9db4ff; font-size:13.5px; margin:10px 0;
+    overflow-x:auto;
+  }
+
+  .tag{
+    display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:11px;
+    padding:3px 9px; border-radius:4px; font-weight:700; letter-spacing:.3px;
+  }
+  .tag.long{background:var(--green-bg); color:var(--green);}
+  .tag.short{background:var(--red-bg); color:var(--red);}
+  .tag.neutral{background:rgba(156,100,255,.12); color:var(--purple);}
+  .tag.info{background:rgba(255,184,0,.12); color:var(--yellow);}
+
+  /* example box */
+  .example{
+    border-left:3px solid var(--blue); background:rgba(41,98,255,.05);
+    padding:12px 16px; border-radius:0 6px 6px 0; margin:12px 0; font-size:13.5px;
+  }
+  .example .ex-label{font-family:var(--mono); font-size:11px; color:var(--blue); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; font-weight:700;}
+
+  table{width:100%; border-collapse:collapse; font-size:13px; margin:10px 0;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--border);}
+  th{color:var(--text-dim); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.5px;}
+  td{font-family:var(--mono); color:var(--text);}
+  tr:last-child td{border-bottom:none;}
+
+  /* slider control */
+  .control-row{display:flex; align-items:center; gap:12px; margin:10px 0; flex-wrap:wrap;}
+  .control{flex:1; min-width:200px;}
+  .control label{display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-bottom:6px;}
+  .control label .val{font-family:var(--mono); color:var(--text-bright); font-weight:700;}
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
+    background:var(--border); outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+    background:var(--blue); cursor:pointer; border:2px solid #0b0e14;
+  }
+  select{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    border-radius:5px; padding:6px 10px; font-family:var(--sans); font-size:13px;
+  }
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .btn{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    padding:6px 13px; border-radius:5px; font-size:12.5px; cursor:pointer; font-family:var(--sans);
+    transition:.12s;
+  }
+  .btn:hover{border-color:var(--blue); color:var(--text-bright);}
+  .btn.active{background:var(--blue); border-color:var(--blue); color:#fff; font-weight:600;}
+
+  canvas{display:block; width:100%; border-radius:6px;}
+  .chart-wrap{background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:10px; margin:12px 0;}
+
+  .stat-strip{display:flex; gap:0; border:1px solid var(--border); border-radius:6px; overflow:hidden; margin:12px 0;}
+  .stat-cell{flex:1; padding:10px 14px; border-right:1px solid var(--border); background:var(--panel2);}
+  .stat-cell:last-child{border-right:none;}
+  .stat-cell .s-label{font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;}
+  .stat-cell .s-val{font-family:var(--mono); font-size:15px; font-weight:700; color:var(--text-bright); margin-top:3px;}
+  .stat-cell .s-val.pos{color:var(--green);}
+  .stat-cell .s-val.neg{color:var(--red);}
+
+  .leg-row{
+    display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--panel2);
+    border:1px solid var(--border); border-radius:6px; margin-bottom:8px; font-family:var(--mono); font-size:12.5px;
+    flex-wrap:wrap;
+  }
+  .econ-box{
+    background:linear-gradient(135deg, rgba(156,100,255,.06), rgba(41,98,255,.04));
+    border:1px solid #383150; border-radius:8px; padding:16px 18px; margin-top:14px;
+  }
+  .econ-box .econ-title{font-family:var(--mono); font-size:11px; color:var(--purple); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; margin-bottom:8px;}
+
+  .pager{display:flex; justify-content:space-between; margin-top:32px; padding-top:18px; border-top:1px solid var(--border);}
+  .pager .pbtn{
+    display:flex; flex-direction:column; cursor:pointer; padding:10px 16px; border-radius:6px;
+    border:1px solid var(--border); background:var(--panel2); max-width:45%;
+  }
+  .pager .pbtn:hover{border-color:var(--blue);}
+  .pager .pbtn .pdir{font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;}
+  .pager .pbtn .ptitle{color:var(--text-bright); font-size:13px; font-weight:600; margin-top:2px;}
+  .pager .pbtn.right{text-align:right; align-items:flex-end;}
+
+  .badge-row{display:flex; gap:8px; margin:10px 0; flex-wrap:wrap;}
+  .legend-dot{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px;}
+
+  @media(max-width:760px){
+    .sidebar{position:fixed; left:-260px; transition:.2s; z-index:200; box-shadow:8px 0 24px rgba(0,0,0,.4);}
+    .sidebar.open{left:0;}
+    .main{padding:20px 16px 60px;}
+    .menu-toggle{display:flex !important;}
+    .topbar .ticker{display:none;}
+  }
+  .menu-toggle{display:none; width:32px; height:32px; border:1px solid var(--border); border-radius:6px; background:var(--panel2); color:var(--text); align-items:center; justify-content:center; cursor:pointer; font-size:16px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="menu-toggle" id="menuToggle">☰</div>
+  <div class="logo"><div class="mark">Θ</div>選擇權學院</div>
+  <div class="sub">Options Greeks &amp; Strategy Lab</div>
+  <div class="ticker">
+    <div class="t-item"><span class="t-label">SAMPLE STOCK</span><span class="t-val">$100.00</span></div>
+    <div class="t-item"><span class="t-label">IV</span><span class="t-val">28%</span></div>
+    <div class="t-item"><span class="t-label">MODE</span><span class="t-val up">教學模式</span></div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <div class="nav-title">基礎</div>
+      <div class="nav-item" data-target="intro"><span class="dot"></span>選擇權是什麼</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">四種基本部位</div>
+      <div class="nav-item" data-target="buycall"><span class="dot"></span>買進 Call (Long Call)</div>
+      <div class="nav-item" data-target="sellcall"><span class="dot"></span>賣出 Call (Short Call)</div>
+      <div class="nav-item" data-target="buyput"><span class="dot"></span>買進 Put (Long Put)</div>
+      <div class="nav-item" data-target="sellput"><span class="dot"></span>賣出 Put (Short Put)</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">希臘字母 Greeks</div>
+      <div class="nav-item" data-target="delta"><span class="dot"></span>Delta Δ</div>
+      <div class="nav-item" data-target="gamma"><span class="dot"></span>Gamma Γ</div>
+      <div class="nav-item" data-target="theta"><span class="dot"></span>Theta Θ</div>
+      <div class="nav-item" data-target="vega"><span class="dot"></span>Vega ν</div>
+      <div class="nav-item" data-target="rho"><span class="dot"></span>Rho ρ</div>
+      <div class="nav-item" data-target="playground"><span class="dot"></span>Greeks 互動模擬器</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">兩腳策略</div>
+      <div class="nav-item" data-target="bullcall"><span class="dot"></span>多頭價差 Bull Call Spread</div>
+      <div class="nav-item" data-target="bearput"><span class="dot"></span>空頭價差 Bear Put Spread</div>
+      <div class="nav-item" data-target="straddle"><span class="dot"></span>買進跨式 Long Straddle</div>
+      <div class="nav-item" data-target="strangle"><span class="dot"></span>賣出勒式 Short Strangle</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">進階：純波動度交易</div>
+      <div class="nav-item" data-target="puregamma"><span class="dot"></span>用期貨/個股 Long Gamma</div>
+      <div class="nav-item" data-target="purevega"><span class="dot"></span>用期貨/個股 Long Vega</div>
+      <div class="nav-item" data-target="purevol"><span class="dot"></span>用期貨/個股 Long Vol（總波動度）</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ===================== INTRO ===================== -->
+    <div class="panel active" id="p-intro">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>OPTIONS 101</div>
+        <h1>選擇權是什麼<span class="symbol">CALL / PUT</span></h1>
+        <p class="tagline">選擇權是一份「權利」合約：買方付出權利金，取得在未來某個時點以特定價格買進或賣出股票的權利；賣方收取權利金，但承擔被履約的義務。</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2><span class="icon-sq">C</span>Call（買權）</h2>
+          <p>持有人有權「<b style="color:var(--green)">用約定價格買進</b>」股票。當股價上漲，Call 的價值上升 — 因為你能用較便宜的價格買到更貴的股票。</p>
+          <p class="muted">舉例：台積電股價 $900，你持有履約價 $920 的 Call。若股價漲到 $960，你可以用 $920 買進，等於賺到 $40 的內含價值。</p>
+        </div>
+        <div class="card">
+          <h2><span class="icon-sq">P</span>Put（賣權）</h2>
+          <p>持有人有權「<b style="color:var(--red)">用約定價格賣出</b>」股票。當股價下跌，Put 的價值上升 — 因為你能用較高的價格賣出較便宜的股票。</p>
+          <p class="muted">舉例：股價 $900，你持有履約價 $880 的 Put。若股價跌到 $840，你可以用 $880 賣出，等於賺到 $40 的內含價值。</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">4</span>四種基本動作的方向性</h2>
+        <table>
+          <tr><th>動作</th><th>對股價方向的看法</th><th>最大損失</th><th>最大獲利</th><th>權利金</th></tr>
+          <tr><td class="tag long" style="display:inline-flex">買進 Call</td><td>看漲（看大漲）</td><td>權利金（有限）</td><td>無限</td><td>支付</td></tr>
+          <tr><td class="tag short" style="display:inline-flex">賣出 Call</td><td>看跌或盤整</td><td>無限</td><td>權利金（有限）</td><td>收取</td></tr>
+          <tr><td class="tag long" style="display:inline-flex">買進 Put</td><td>看跌（看大跌）</td><td>權利金（有限）</td><td>接近無限（股價可跌至0）</td><td>支付</td></tr>
+          <tr><td class="tag short" style="display:inline-flex">賣出 Put</td><td>看漲或盤整</td><td>接近無限（股價可跌至0）</td><td>權利金（有限）</td><td>收取</td></tr>
+        </table>
+        <p class="muted" style="margin-top:8px;">這份網站會用「希臘字母」量化每個部位對股價、時間、波動度變化的敏感度，並用實例說明每一種部位與兩腳組合策略背後的經濟意涵。</p>
+      </div>
+    </div>
+
+    <!-- ===================== BUY CALL ===================== -->
+    <div class="panel" id="p-buycall">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>基本部位 01 / 04</div>
+        <h1>買進 Call<span class="symbol">LONG CALL</span></h1>
+        <p class="tagline"><span class="tag long">看漲</span> 用最小的成本，換取股價大漲時的無限上檔利潤。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">P</span>到期損益圖</h2>
+        <div class="control-row">
+          <div class="control"><label>履約價 Strike <span class="val" id="bc_k_val">100</span></label><input type="range" id="bc_k" min="80" max="120" value="100"></div>
+          <div class="control"><label>權利金 Premium <span class="val" id="bc_p_val">5</span></label><input type="range" id="bc_p" min="1" max="15" value="5"></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart_buycall" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">損益兩平點</div><div class="s-val" id="bc_be">105.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失</div><div class="s-val neg" id="bc_maxloss">-5.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利</div><div class="s-val pos">無限</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          股票 XYZ 現價 $100，你預期一個月內會大漲。買進 1 口履約價 $100 的 Call，支付權利金 $5（每股，合約規模通常 100 股，故實際成本 $500）。
+        </div>
+        <table>
+          <tr><th>到期股價</th><th>內含價值</th><th>損益（每股）</th></tr>
+          <tr><td>$90</td><td>$0</td><td class="tag short" style="display:inline-flex">-$5.00</td></tr>
+          <tr><td>$100</td><td>$0</td><td class="tag short" style="display:inline-flex">-$5.00</td></tr>
+          <tr><td>$105（損益兩平）</td><td>$5</td><td>$0.00</td></tr>
+          <tr><td>$120</td><td>$20</td><td class="tag long" style="display:inline-flex">+$15.00</td></tr>
+          <tr><td>$150</td><td>$50</td><td class="tag long" style="display:inline-flex">+$45.00</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>買 Call 是用「有限、已知的成本」去交換「股價大漲的無限參與權」，本質上是一種<b>槓桿化的看多部位</b>：花較少資金（$5 vs 買進股票要 $100）就能參與股價上漲的利潤，槓桿倍數隨股價上漲而提高（因為 Delta 會上升）。但若股價不漲或下跌，你會在到期日損失全部已付出的權利金，這是「用權利金買保險式的上檔機會」。對賣方而言，他收了你的權利金，相當於賣給你一個「股價漲多少都要照價供應股票」的承諾，因此承擔無限風險。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="intro"><span class="pdir">← 上一頁</span><span class="ptitle">選擇權是什麼</span></div>
+        <div class="pbtn right" data-target="sellcall"><span class="pdir">下一頁 →</span><span class="ptitle">賣出 Call</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== SELL CALL ===================== -->
+    <div class="panel" id="p-sellcall">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>基本部位 02 / 04</div>
+        <h1>賣出 Call<span class="symbol">SHORT CALL</span></h1>
+        <p class="tagline"><span class="tag short">看跌 / 看平</span> 收取權利金，賭股價不會大漲，但若大漲則承擔無限風險。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">P</span>到期損益圖</h2>
+        <div class="control-row">
+          <div class="control"><label>履約價 Strike <span class="val" id="sc_k_val">100</span></label><input type="range" id="sc_k" min="80" max="120" value="100"></div>
+          <div class="control"><label>權利金 Premium <span class="val" id="sc_p_val">5</span></label><input type="range" id="sc_p" min="1" max="15" value="5"></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart_sellcall" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">損益兩平點</div><div class="s-val" id="sc_be">105.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利</div><div class="s-val pos" id="sc_maxgain">+5.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失</div><div class="s-val neg">無限</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          股票 XYZ 現價 $100，你認為短期內不會大漲（盤整或小跌）。賣出 1 口履約價 $100 的 Call，收取權利金 $5（先入帳）。
+        </div>
+        <table>
+          <tr><th>到期股價</th><th>須支付差額</th><th>損益（每股）</th></tr>
+          <tr><td>$90</td><td>$0</td><td class="tag long" style="display:inline-flex">+$5.00（全拿權利金）</td></tr>
+          <tr><td>$100</td><td>$0</td><td class="tag long" style="display:inline-flex">+$5.00</td></tr>
+          <tr><td>$105（損益兩平）</td><td>$5</td><td>$0.00</td></tr>
+          <tr><td>$130</td><td>$30</td><td class="tag short" style="display:inline-flex">-$25.00</td></tr>
+          <tr><td>$200</td><td>$100</td><td class="tag short" style="display:inline-flex">-$95.00</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>賣 Call 的核心邏輯是「<b>出售上檔保險</b>」：你向買方承諾「不論股價漲多高，都用履約價賣給你」，並收取保費（權利金）作為承擔此義務的報酬。這是時間價值的賣方，只要股價在到期前不超過「履約價＋權利金」，你就能穩定獲利，本質上是<b>用有限、機率較高的小額利潤，去交換罕見但可能無限的虧損</b>，常見於對個股已有庫存、想增加收益的「掩護性買權（Covered Call）」策略中，用來降低持股成本或增加收益。若是「裸賣（Naked Call）」則風險極高，因為沒有股票部位去對沖上漲損失。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="buycall"><span class="pdir">← 上一頁</span><span class="ptitle">買進 Call</span></div>
+        <div class="pbtn right" data-target="buyput"><span class="pdir">下一頁 →</span><span class="ptitle">買進 Put</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== BUY PUT ===================== -->
+    <div class="panel" id="p-buyput">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>基本部位 03 / 04</div>
+        <h1>買進 Put<span class="symbol">LONG PUT</span></h1>
+        <p class="tagline"><span class="tag short">看跌</span> 用最小成本，換取股價大跌時的高額利潤，也常用作「下檔保險」。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">P</span>到期損益圖</h2>
+        <div class="control-row">
+          <div class="control"><label>履約價 Strike <span class="val" id="bp_k_val">100</span></label><input type="range" id="bp_k" min="80" max="120" value="100"></div>
+          <div class="control"><label>權利金 Premium <span class="val" id="bp_p_val">5</span></label><input type="range" id="bp_p" min="1" max="15" value="5"></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart_buyput" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">損益兩平點</div><div class="s-val" id="bp_be">95.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失</div><div class="s-val neg" id="bp_maxloss">-5.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利（股價趨近0）</div><div class="s-val pos" id="bp_maxgain">+95.00</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          股票 XYZ 現價 $100，你擔心財報利空或大盤回檔。買進 1 口履約價 $100 的 Put，支付權利金 $5。
+        </div>
+        <table>
+          <tr><th>到期股價</th><th>內含價值</th><th>損益（每股）</th></tr>
+          <tr><td>$120</td><td>$0</td><td class="tag short" style="display:inline-flex">-$5.00</td></tr>
+          <tr><td>$100</td><td>$0</td><td class="tag short" style="display:inline-flex">-$5.00</td></tr>
+          <tr><td>$95（損益兩平）</td><td>$5</td><td>$0.00</td></tr>
+          <tr><td>$80</td><td>$20</td><td class="tag long" style="display:inline-flex">+$15.00</td></tr>
+          <tr><td>$50</td><td>$50</td><td class="tag long" style="display:inline-flex">+$45.00</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>買 Put 等同於買一張「股價下跌保險單」：你付出權利金，換取在股價崩跌時「以履約價賣出」的權利，避開更大的損失，這正是法人最常用來對沖手中持股下檔風險（Protective Put）的工具。對投機者而言，買 Put 是用很小成本博取股價大跌的高槓桿報酬 —— 由於股價下跌有底（最低為0），最大獲利雖非「無限」，但仍可能是權利金的數倍乃至數十倍，風險與報酬高度不對稱。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="sellcall"><span class="pdir">← 上一頁</span><span class="ptitle">賣出 Call</span></div>
+        <div class="pbtn right" data-target="sellput"><span class="pdir">下一頁 →</span><span class="ptitle">賣出 Put</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== SELL PUT ===================== -->
+    <div class="panel" id="p-sellput">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>基本部位 04 / 04</div>
+        <h1>賣出 Put<span class="symbol">SHORT PUT</span></h1>
+        <p class="tagline"><span class="tag long">看漲 / 看平</span> 收取權利金，賭股價不會大跌，常用於「願意接股」的策略。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">P</span>到期損益圖</h2>
+        <div class="control-row">
+          <div class="control"><label>履約價 Strike <span class="val" id="sp_k_val">100</span></label><input type="range" id="sp_k" min="80" max="120" value="100"></div>
+          <div class="control"><label>權利金 Premium <span class="val" id="sp_p_val">5</span></label><input type="range" id="sp_p" min="1" max="15" value="5"></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart_sellput" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">損益兩平點</div><div class="s-val" id="sp_be">95.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利</div><div class="s-val pos" id="sp_maxgain">+5.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失（股價趨近0）</div><div class="s-val neg" id="sp_maxloss">-95.00</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          股票 XYZ 現價 $100，你認為不會大跌，甚至願意在 $100 接股。賣出 1 口履約價 $100 的 Put，收取權利金 $5。
+        </div>
+        <table>
+          <tr><th>到期股價</th><th>須支付差額</th><th>損益（每股）</th></tr>
+          <tr><td>$120</td><td>$0</td><td class="tag long" style="display:inline-flex">+$5.00</td></tr>
+          <tr><td>$100</td><td>$0</td><td class="tag long" style="display:inline-flex">+$5.00</td></tr>
+          <tr><td>$95（損益兩平）</td><td>$5</td><td>$0.00</td></tr>
+          <tr><td>$80</td><td>$20</td><td class="tag short" style="display:inline-flex">-$15.00</td></tr>
+          <tr><td>$50</td><td>$50</td><td class="tag short" style="display:inline-flex">-$45.00</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>賣 Put 等於「<b>出售下檔保險，並承諾在股價跌破履約價時用該價格承接股票</b>」。許多長期投資人會用此策略當作「有紀律的限價買進」：如果股價沒跌破履約價，就白白賺取權利金；如果跌破，則用比目前股價更低的成本價（履約價－權利金）買進原本就想持有的股票。經濟本質上，賣方提供流動性與保險給市場上想避險的買方，承擔「股價崩跌時被迫接刀」的風險，以換取穩定的權利金收入，是機構法人常見的收益增強（Yield Enhancement）工具。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="buyput"><span class="pdir">← 上一頁</span><span class="ptitle">買進 Put</span></div>
+        <div class="pbtn right" data-target="delta"><span class="pdir">下一頁 →</span><span class="ptitle">Delta Δ</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== DELTA ===================== -->
+    <div class="panel" id="p-delta">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>希臘字母 01 / 05</div>
+        <h1>Delta<span class="symbol">Δ · 股價敏感度</span></h1>
+        <p class="tagline">衡量「股價每變動 $1，選擇權價格大約會變動多少」，也約略等於該選擇權「到期時落在價內的機率」。</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2><span class="icon-sq">∂</span>定義</h2>
+          <div class="formula">Delta = ∂(選擇權價格) / ∂(股價)</div>
+          <p>Call 的 Delta 介於 <b>0 ~ 1</b>；Put 的 Delta 介於 <b>-1 ~ 0</b>。深度價外 ≈ 0，價平 ≈ 0.5（Call）或 -0.5（Put），深度價內趨近 ±1。</p>
+          <table>
+            <tr><th>部位</th><th>Delta 範圍</th><th>股價漲時</th></tr>
+            <tr><td>買進 Call</td><td>0 ~ +1</td><td class="tag long" style="display:inline-flex">獲利</td></tr>
+            <tr><td>賣出 Call</td><td>-1 ~ 0</td><td class="tag short" style="display:inline-flex">虧損</td></tr>
+            <tr><td>買進 Put</td><td>-1 ~ 0</td><td class="tag short" style="display:inline-flex">虧損</td></tr>
+            <tr><td>賣出 Put</td><td>0 ~ +1</td><td class="tag long" style="display:inline-flex">獲利</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h2><span class="icon-sq">例</span>實例說明</h2>
+          <div class="example">
+            <div class="ex-label">情境</div>
+            股票 XYZ 現價 $100，持有 Delta = 0.5 的 Call。
+          </div>
+          <p>若股價上漲 $2 → 選擇權價格約上漲 $2 × 0.5 = <b style="color:var(--green)">$1.00</b>。</p>
+          <p>若股價下跌 $2 → 選擇權價格約下跌 $1.00。</p>
+          <p class="muted">Delta 也是「避險比率」：賣方若要做 Delta 中性避險，每賣 1 口 Delta 0.5 的 Call（100股/口），須買進 50 股股票來對沖股價變動的風險，這就是造市商常用的 Delta Hedging。</p>
+        </div>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>Delta 本質上回答了「這個部位有多像一張股票」：Delta = 0.5 的 Call，漲跌幅度大約是持有 50 股股票的一半，所以常被稱為「<b>等效股數（share equivalent）</b>」。對投機者，Delta 越高代表方向性曝險越大、越接近直接持有股票；對避險者與造市商，Delta 是計算「需要買賣多少股票才能讓整體部位不受股價漲跌影響」的關鍵指標，是選擇權市場流動性供給與風險管理的核心。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="sellput"><span class="pdir">← 上一頁</span><span class="ptitle">賣出 Put</span></div>
+        <div class="pbtn right" data-target="gamma"><span class="pdir">下一頁 →</span><span class="ptitle">Gamma Γ</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== GAMMA ===================== -->
+    <div class="panel" id="p-gamma">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>希臘字母 02 / 05</div>
+        <h1>Gamma<span class="symbol">Γ · Delta 的加速度</span></h1>
+        <p class="tagline">衡量「股價每變動 $1，Delta 會變動多少」，也就是「Delta 的變動率」，常被稱為選擇權的「加速度」。</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2><span class="icon-sq">∂</span>定義</h2>
+          <div class="formula">Gamma = ∂(Delta) / ∂(股價)</div>
+          <p>買方（不論 Call 或 Put）的 Gamma 永遠是<b style="color:var(--green)">正值</b>；賣方永遠是<b style="color:var(--red)">負值</b>。Gamma 在「價平（At-the-money）」最大，深度價內或價外則趨近於 0。</p>
+        </div>
+        <div class="card">
+          <h2><span class="icon-sq">例</span>實例說明</h2>
+          <div class="example">
+            <div class="ex-label">情境</div>
+            股票 $100，買進價平 Call，Delta = 0.50，Gamma = 0.06。
+          </div>
+          <p>股價漲到 $101 → 新 Delta ≈ 0.50 + 0.06 = <b style="color:var(--green)">0.56</b>（部位變得更看漲，漲速加快）。</p>
+          <p>股價跌到 $99 → 新 Delta ≈ 0.50 - 0.06 = <b style="color:var(--red)">0.44</b>（部位看漲程度減弱）。</p>
+        </div>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>Gamma 描述的是「你的方向性曝險會如何隨股價自我增強」。<b>買方是「正 Gamma」</b>：股價往有利方向移動時，部位會自動變得更有利（Delta 加速擴大），股價往不利方向移動時，曝險自動縮小，這正是「買選擇權風險有限、報酬不對稱放大」的數學根源 —— 你不需要預測對「精確時機」，只要方向大致正確且波動夠大，正 Gamma 就會持續放大你的獲利。<b>賣方是「負 Gamma」</b>：部位會在不利方向上加速惡化，這也是為什麼選擇權賣方（尤其是裸賣）必須非常嚴格地控制部位大小與停損，因為風險會隨著價格走勢「加速」擴大，而非線性增加。Gamma 也是造市商避險成本的核心：高 Gamma 部位需要更頻繁地調整避險股數。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="delta"><span class="pdir">← 上一頁</span><span class="ptitle">Delta Δ</span></div>
+        <div class="pbtn right" data-target="theta"><span class="pdir">下一頁 →</span><span class="ptitle">Theta Θ</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== THETA ===================== -->
+    <div class="panel" id="p-theta">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>希臘字母 03 / 05</div>
+        <h1>Theta<span class="symbol">Θ · 時間價值流逝</span></h1>
+        <p class="tagline">衡量「每經過一天，選擇權價格會減少多少」，反映選擇權「會隨時間貶值」的特性。</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2><span class="icon-sq">∂</span>定義</h2>
+          <div class="formula">Theta = ∂(選擇權價格) / ∂(時間)</div>
+          <p>買方（Long Call / Long Put）的 Theta 通常為<b style="color:var(--red)">負值</b>（每天都在貶值）；賣方的 Theta 為<b style="color:var(--green)">正值</b>（每天都在獲利）。Theta 隨著接近到期日而加速，價平選擇權的 Theta 衰減最快（尤其最後 30 天）。</p>
+        </div>
+        <div class="card">
+          <h2><span class="icon-sq">例</span>實例說明</h2>
+          <div class="example">
+            <div class="ex-label">情境</div>
+            買進 Call，現價 $5.00，Theta = -0.05。
+          </div>
+          <p>若股價與波動度完全不變，明天這張 Call 理論上會剩下 $5.00 - $0.05 = <b style="color:var(--red)">$4.95</b>。</p>
+          <p>對賣方而言，他每天能穩定收取約 $0.05 的時間價值，這就是賣方策略「躺著賺」的來源 —— 只要股價不大幅變動。</p>
+        </div>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>Theta 反映選擇權的「<b>租金本質</b>」：買方付出權利金，等於是「租用」在到期前獲利的可能性，時間每過一天，這個機會視窗就少一天，價值自然遞減，這是選擇權有別於股票最關鍵的特徵 —— 股票放著不賣不會貶值，但選擇權會。賣方則扮演「出租者」的角色，只要時間流逝且股價未大幅偏離，就能持續賺取租金（時間價值）。這也解釋了為什麼「買方需要股價在有限時間內朝對的方向移動足夠幅度」才能獲利，光是「猜對方向」是不夠的，還必須「猜對時機」；而賣方的優勢正是時間站在他這一邊，這也是 Theta 與 Gamma 之間存在的經典抵換關係：正 Gamma（買方）必然伴隨負 Theta，負 Gamma（賣方）必然伴隨正 Theta。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="gamma"><span class="pdir">← 上一頁</span><span class="ptitle">Gamma Γ</span></div>
+        <div class="pbtn right" data-target="vega"><span class="pdir">下一頁 →</span><span class="ptitle">Vega ν</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== VEGA ===================== -->
+    <div class="panel" id="p-vega">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>希臘字母 04 / 05</div>
+        <h1>Vega<span class="symbol">ν · 波動度敏感度</span></h1>
+        <p class="tagline">衡量「隱含波動度（IV）每變動 1%，選擇權價格會變動多少」，反映市場對未來不確定性的定價。</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2><span class="icon-sq">∂</span>定義</h2>
+          <div class="formula">Vega = ∂(選擇權價格) / ∂(隱含波動度)</div>
+          <p>買方（Call 或 Put）的 Vega 永遠是<b style="color:var(--green)">正值</b>：波動度上升，選擇權變貴。賣方的 Vega 為<b style="color:var(--red)">負值</b>：波動度上升會侵蝕賣方獲利。Vega 在價平選擇權、且距到期時間較長時最大。</p>
+        </div>
+        <div class="card">
+          <h2><span class="icon-sq">例</span>實例說明</h2>
+          <div class="example">
+            <div class="ex-label">情境</div>
+            買進 Call，現價 $5.00，Vega = 0.12。財報公布前市場恐慌，IV 從 25% 跳升至 35%。
+          </div>
+          <p>選擇權價格約上漲 0.12 × 10 = <b style="color:var(--green)">$1.20</b>，即使股價完全沒動！</p>
+          <p>財報公布後恐慌解除（IV Crush），IV 從 35% 驟降回 22% → 即使股價照你預測的方向走，選擇權價格也可能因 Vega 損失而幾乎不漲，這是許多新手在財報前買選擇權卻虧錢的主因。</p>
+        </div>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>Vega 衡量的是「<b>市場對不確定性的定價</b>」：隱含波動度越高，代表市場預期股價未來的波動幅度越大，選擇權（不論 Call 或 Put）的價值都會提高，因為「劇烈波動」對買方有利、對賣方不利。買方本質上是在「<b>做多波動度</b>」，即使方向看錯，只要市場恐慌情緒升溫（IV 飆升），也可能獲利；賣方則是在「<b>做空波動度</b>」，靠的是市場恐慌情緒最終會回歸平靜（Mean Reversion）。這正是為什麼選擇權定價不只是賭「漲或跌」，更是賭「漲跌的劇烈程度」，Vega 是連結選擇權市場與總體不確定性（如地緣政治、利率決策、財報）最直接的橋樑。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="theta"><span class="pdir">← 上一頁</span><span class="ptitle">Theta Θ</span></div>
+        <div class="pbtn right" data-target="rho"><span class="pdir">下一頁 →</span><span class="ptitle">Rho ρ</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== RHO ===================== -->
+    <div class="panel" id="p-rho">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>希臘字母 05 / 05</div>
+        <h1>Rho<span class="symbol">ρ · 利率敏感度</span></h1>
+        <p class="tagline">衡量「無風險利率每變動 1%，選擇權價格會變動多少」，影響通常最小，但在利率劇烈變動或長天期選擇權上不可忽視。</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2><span class="icon-sq">∂</span>定義</h2>
+          <div class="formula">Rho = ∂(選擇權價格) / ∂(無風險利率)</div>
+          <p>Call 的 Rho 為<b style="color:var(--green)">正值</b>（利率升，Call 變貴）；Put 的 Rho 為<b style="color:var(--red)">負值</b>（利率升，Put 變便宜）。對短天期選擇權影響極小，但對 LEAPS（長天期選擇權，一年以上）影響顯著。</p>
+        </div>
+        <div class="card">
+          <h2><span class="icon-sq">例</span>實例說明</h2>
+          <div class="example">
+            <div class="ex-label">情境</div>
+            買進一年期 Call，Rho = 0.45。央行升息 1 碼（0.25%）。
+          </div>
+          <p>選擇權價格約上漲 0.45 × 0.25 = <b style="color:var(--green)">$0.11</b>。</p>
+          <p class="muted">直覺解釋：買 Call 相當於用很少的權利金「延遲付款」鎖定未來買進股票的價格，等於把原本要付的本金省下來放在無風險利率上生息；利率越高，這個「延遲付款的好處」越值錢，Call 因此越貴；Put 邏輯相反，因為持有 Put 等於延遲收到賣股票的錢，利率越高，等待的機會成本越大，Put 因此越便宜。</p>
+        </div>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>Rho 提醒我們，選擇權定價不只是「股票替代品」，它背後也隱含一筆「資金的時間價值」交易：買 Call 等於延遲支付股票的全額成本，這筆被遞延的資金理論上可以拿去賺取無風險利率，因此利率越高，Call 的吸引力（與理論價格）越高；反之賣方收到賣股的款項被往後遞延，利率越高，等待的機會成本越大，故 Put 越便宜。在升息循環中，這也是為何法人會更偏好用 Call 取代直接持有股票（資金效率更高），而 Rho 正是量化這種「資金佔用成本」差異的工具。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="vega"><span class="pdir">← 上一頁</span><span class="ptitle">Vega ν</span></div>
+        <div class="pbtn right" data-target="playground"><span class="pdir">下一頁 →</span><span class="ptitle">Greeks 互動模擬器</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== PLAYGROUND ===================== -->
+    <div class="panel" id="p-playground">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>互動模擬</div>
+        <h1>Greeks 互動模擬器<span class="symbol">LIVE BLACK-SCHOLES</span></h1>
+        <p class="tagline">拖曳下方滑桿，即時觀察股價、波動度、到期時間如何牽動選擇權價格與五大希臘字母（採 Black-Scholes 模型計算）。</p>
+      </div>
+
+      <div class="card">
+        <div class="btn-row" style="margin-bottom:14px;">
+          <button class="btn active" data-pg-type="call">Call</button>
+          <button class="btn" data-pg-type="put">Put</button>
+        </div>
+        <div class="control-row">
+          <div class="control"><label>股價 Spot (S) <span class="val" id="pg_s_val">100</span></label><input type="range" id="pg_s" min="60" max="140" value="100"></div>
+          <div class="control"><label>履約價 Strike (K) <span class="val" id="pg_k_val">100</span></label><input type="range" id="pg_k" min="60" max="140" value="100"></div>
+        </div>
+        <div class="control-row">
+          <div class="control"><label>隱含波動度 IV (σ) <span class="val" id="pg_v_val">28%</span></label><input type="range" id="pg_v" min="5" max="100" value="28"></div>
+          <div class="control"><label>剩餘天數 (T) <span class="val" id="pg_t_val">30 天</span></label><input type="range" id="pg_t" min="1" max="365" value="30"></div>
+          <div class="control"><label>無風險利率 (r) <span class="val" id="pg_r_val">4%</span></label><input type="range" id="pg_r" min="0" max="10" value="4"></div>
+        </div>
+
+        <div class="stat-strip" style="margin-top:16px;">
+          <div class="stat-cell"><div class="s-label">理論價格</div><div class="s-val" id="pg_price">5.43</div></div>
+          <div class="stat-cell"><div class="s-label">Delta Δ</div><div class="s-val" id="pg_delta">0.52</div></div>
+          <div class="stat-cell"><div class="s-label">Gamma Γ</div><div class="s-val" id="pg_gamma">0.041</div></div>
+          <div class="stat-cell"><div class="s-label">Theta Θ /日</div><div class="s-val neg" id="pg_theta">-0.042</div></div>
+          <div class="stat-cell"><div class="s-label">Vega ν /1%</div><div class="s-val" id="pg_vega">0.115</div></div>
+          <div class="stat-cell"><div class="s-label">Rho ρ /1%</div><div class="s-val" id="pg_rho">0.041</div></div>
+        </div>
+
+        <div class="chart-wrap"><canvas id="chart_playground" height="240"></canvas></div>
+        <p class="muted" style="font-size:12px; margin-top:6px;">灰色曲線：選擇權理論價格隨股價變化。藍色虛線：目前股價位置。此為簡化教學模型，實際市場報價會受供需、流動性與微笑曲線（Volatility Smile）影響。</p>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">怎麼解讀</div>
+        <p>把股價滑桿拖到接近履約價（價平）再觀察 Gamma 與 Vega — 你會發現它們在價平時最大，這代表「不確定性」在價平位置最高，市場最需要為這個不確定性定價。把天數滑桿拉到接近 1 天，觀察 Theta 如何急遽放大 — 這就是「時間價值加速流逝」的具體呈現。把波動度拉高，觀察價格與 Vega 同步上升 — 驗證了選擇權本質上是在交易「波動」，而非單純的方向。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="rho"><span class="pdir">← 上一頁</span><span class="ptitle">Rho ρ</span></div>
+        <div class="pbtn right" data-target="bullcall"><span class="pdir">下一頁 →</span><span class="ptitle">多頭價差</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== BULL CALL SPREAD ===================== -->
+    <div class="panel" id="p-bullcall">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>兩腳策略 01 / 04</div>
+        <h1>多頭價差<span class="symbol">BULL CALL SPREAD</span></h1>
+        <p class="tagline"><span class="tag long">溫和看漲</span> 買進低履約價 Call，同時賣出高履約價 Call，用犧牲部分上檔換取較低成本。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">L</span>兩隻腳組成</h2>
+        <div class="leg-row"><span class="tag long">買進 Call</span> 履約價 $100　支付權利金 $6</div>
+        <div class="leg-row"><span class="tag short">賣出 Call</span> 履約價 $110　收取權利金 $2</div>
+        <div class="chart-wrap"><canvas id="chart_bullcall" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">淨成本</div><div class="s-val neg">-4.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利</div><div class="s-val pos">+6.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失</div><div class="s-val neg">-4.00</div></div>
+          <div class="stat-cell"><div class="s-label">損益兩平</div><div class="s-val">104.00</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <table>
+          <tr><th>到期股價</th><th>Long Call 損益</th><th>Short Call 損益</th><th>總損益</th></tr>
+          <tr><td>$95</td><td>-$6.00</td><td>+$2.00</td><td class="tag short" style="display:inline-flex">-$4.00</td></tr>
+          <tr><td>$104（兩平）</td><td>-$2.00</td><td>+$2.00</td><td>$0.00</td></tr>
+          <tr><td>$110</td><td>+$4.00</td><td>+$2.00</td><td class="tag long" style="display:inline-flex">+$6.00</td></tr>
+          <tr><td>$130</td><td>+$24.00</td><td>-$18.00</td><td class="tag long" style="display:inline-flex">+$6.00（封頂）</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>多頭價差是用「<b>賣出部分上檔潛力，換取較低的進場成本</b>」：單純買 Call 成本 $6，但用賣出更高履約價的 Call 收回 $2，淨成本降為 $4，等於用較少資金換取較高機率達到的目標獲利。代價是獲利在 $110 以上被「封頂」，不再享有無限上檔。這個結構反映出選擇權交易者常面臨的核心抵換：<b>越精準地表達你的觀點（溫和看漲，而非暴漲），越能用更低成本換取更高的資金效率與勝率，但也放棄了極端行情下的超額報酬</b>。同時，因為兩腳的 Vega 與 Theta 部分互相抵銷，此策略對波動度與時間流逝的敏感度也遠低於單純買 Call，適合「方向正確但波動度可能下降」的情境。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="playground"><span class="pdir">← 上一頁</span><span class="ptitle">Greeks 模擬器</span></div>
+        <div class="pbtn right" data-target="bearput"><span class="pdir">下一頁 →</span><span class="ptitle">空頭價差</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== BEAR PUT SPREAD ===================== -->
+    <div class="panel" id="p-bearput">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>兩腳策略 02 / 04</div>
+        <h1>空頭價差<span class="symbol">BEAR PUT SPREAD</span></h1>
+        <p class="tagline"><span class="tag short">溫和看跌</span> 買進高履約價 Put，同時賣出低履約價 Put，用犧牲部分下檔利潤換取較低成本。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">L</span>兩隻腳組成</h2>
+        <div class="leg-row"><span class="tag long">買進 Put</span> 履約價 $100　支付權利金 $6</div>
+        <div class="leg-row"><span class="tag short">賣出 Put</span> 履約價 $90　收取權利金 $2</div>
+        <div class="chart-wrap"><canvas id="chart_bearput" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">淨成本</div><div class="s-val neg">-4.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利</div><div class="s-val pos">+6.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失</div><div class="s-val neg">-4.00</div></div>
+          <div class="stat-cell"><div class="s-label">損益兩平</div><div class="s-val">96.00</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <table>
+          <tr><th>到期股價</th><th>Long Put 損益</th><th>Short Put 損益</th><th>總損益</th></tr>
+          <tr><td>$105</td><td>-$6.00</td><td>+$2.00</td><td class="tag short" style="display:inline-flex">-$4.00</td></tr>
+          <tr><td>$96（兩平）</td><td>-$2.00</td><td>+$2.00</td><td>$0.00</td></tr>
+          <tr><td>$90</td><td>+$4.00</td><td>+$2.00</td><td class="tag long" style="display:inline-flex">+$6.00</td></tr>
+          <tr><td>$70</td><td>+$24.00</td><td>-$18.00</td><td class="tag long" style="display:inline-flex">+$6.00（封頂）</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>空頭價差的邏輯與多頭價差互為鏡像：你願意放棄股價「跌破 $90 以下」的額外利潤（賣出 $90 Put 收權利金），來換取「跌到 $100 以下」就能開始獲利的較低成本部位。這特別適合「<b>預期會回檔修正，但不認為會崩盤式下跌</b>」的情境 —— 若直接買裸 Put，付出的權利金較高，且大部分價值來自市場對「極端下跌尾端風險」的定價，但若你並不認同那麼極端的情境，透過賣出更低履約價的 Put，等於把你不看好的那段價格區間的保費「轉售」給更悲觀的交易者，藉此換取資金效率。同樣地，兩腳的 Theta 與 Vega 互相抵銷，讓部位更純粹地反映「股價方向」，而非被時間流逝或恐慌情緒大幅左右。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="bullcall"><span class="pdir">← 上一頁</span><span class="ptitle">多頭價差</span></div>
+        <div class="pbtn right" data-target="straddle"><span class="pdir">下一頁 →</span><span class="ptitle">買進跨式</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== STRADDLE ===================== -->
+    <div class="panel" id="p-straddle">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>兩腳策略 03 / 04</div>
+        <h1>買進跨式<span class="symbol">LONG STRADDLE</span></h1>
+        <p class="tagline"><span class="tag neutral">做多波動度</span> 同時買進相同履約價的 Call 與 Put，賭股價會「大幅波動」，但不確定方向。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">L</span>兩隻腳組成</h2>
+        <div class="leg-row"><span class="tag long">買進 Call</span> 履約價 $100　支付權利金 $5</div>
+        <div class="leg-row"><span class="tag long">買進 Put</span> 履約價 $100　支付權利金 $5</div>
+        <div class="chart-wrap"><canvas id="chart_straddle" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">淨成本</div><div class="s-val neg">-10.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失</div><div class="s-val neg">-10.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利</div><div class="s-val pos">無限（雙向）</div></div>
+          <div class="stat-cell"><div class="s-label">損益兩平</div><div class="s-val">90 / 110</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          財報公布前，股價 $100，你不知道財報是利多還利空，但確定股價會有「大行情」。
+        </div>
+        <table>
+          <tr><th>到期股價</th><th>Call 損益</th><th>Put 損益</th><th>總損益</th></tr>
+          <tr><td>$100（不動）</td><td>-$5.00</td><td>-$5.00</td><td class="tag short" style="display:inline-flex">-$10.00（最大損失）</td></tr>
+          <tr><td>$90 或 $110（兩平）</td><td>-</td><td>-</td><td>$0.00</td></tr>
+          <tr><td>$130（大漲）</td><td>+$25.00</td><td>-$5.00</td><td class="tag long" style="display:inline-flex">+$20.00</td></tr>
+          <tr><td>$70（大跌）</td><td>-$5.00</td><td>+$25.00</td><td class="tag long" style="display:inline-flex">+$20.00</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>跨式策略是「<b>純粹做多波動度、放棄方向性賭注</b>」的經典結構：Call 與 Put 的 Delta 在價平時互相接近抵銷（+0.5 與 -0.5），但 Gamma 與 Vega 卻是同向疊加，兩者都是正值且翻倍，這代表此部位幾乎不在乎股價「往哪走」，只在乎股價「走多遠、走多急」。最大的敵人是 Theta（時間價值雙重流逝）—— 如果股價維持平靜不動，兩條腿的權利金都會被時間侵蝕殆盡，這也是為什麼跨式策略常被用在「已知會有重大事件（財報、法說會、新藥審批、選舉結果）但不知道結果方向」的情境，本質上是用權利金去交換「事件結果的不確定性所創造的波動」，是市場上最直接「做多波動度本身」的交易方式。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="bearput"><span class="pdir">← 上一頁</span><span class="ptitle">空頭價差</span></div>
+        <div class="pbtn right" data-target="strangle"><span class="pdir">下一頁 →</span><span class="ptitle">賣出勒式</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== STRANGLE ===================== -->
+    <div class="panel" id="p-strangle">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>兩腳策略 04 / 04</div>
+        <h1>賣出勒式<span class="symbol">SHORT STRANGLE</span></h1>
+        <p class="tagline"><span class="tag neutral">做空波動度</span> 同時賣出價外 Call 與價外 Put，賭股價會在區間內盤整，收取雙重權利金。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">L</span>兩隻腳組成</h2>
+        <div class="leg-row"><span class="tag short">賣出 Call</span> 履約價 $110　收取權利金 $3</div>
+        <div class="leg-row"><span class="tag short">賣出 Put</span> 履約價 $90　收取權利金 $3</div>
+        <div class="chart-wrap"><canvas id="chart_strangle" height="260"></canvas></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="s-label">淨收入</div><div class="s-val pos">+6.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大獲利</div><div class="s-val pos">+6.00</div></div>
+          <div class="stat-cell"><div class="s-label">最大損失</div><div class="s-val neg">無限（雙向）</div></div>
+          <div class="stat-cell"><div class="s-label">損益兩平</div><div class="s-val">84 / 116</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>實例說明</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          股票 $100，近期消息面平靜，你預期股價會在 $90～$110 之間整理。
+        </div>
+        <table>
+          <tr><th>到期股價</th><th>Call 損益</th><th>Put 損益</th><th>總損益</th></tr>
+          <tr><td>$100（盤整）</td><td>+$3.00</td><td>+$3.00</td><td class="tag long" style="display:inline-flex">+$6.00（最大獲利）</td></tr>
+          <tr><td>$84 或 $116（兩平）</td><td>-</td><td>-</td><td>$0.00</td></tr>
+          <tr><td>$130（大漲）</td><td>-$17.00</td><td>+$3.00</td><td class="tag short" style="display:inline-flex">-$14.00</td></tr>
+          <tr><td>$70（大跌）</td><td>+$3.00</td><td>-$17.00</td><td class="tag short" style="display:inline-flex">-$14.00</td></tr>
+        </table>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>賣出勒式與買進跨式互為鏡像，是「<b>純粹做空波動度</b>」的策略：你向市場同時出售「股價不會大漲」與「股價不會大跌」兩份保險，賺取雙重保費，本質上是在賭「實際發生的波動，會小於目前選擇權市場（隱含波動度）所定價的波動」。此部位的 Gamma 與 Vega 皆為負值且雙倍疊加，代表一旦股價劇烈波動（不論方向），虧損會加速擴大；但只要市場維持平靜，正 Theta 會讓你持續穩定獲利，每天時間流逝都對你有利。這正是許多機構與專業選擇權賣方的核心收益模式 —— 多數時間市場是平靜的，恐慌與崩盤是相對少數的尾端事件，因此長期系統性出售波動度在統計上常有正期望值，但代價是必須承受偶發但劇烈的尾端風險，因此嚴格的部位控管與停損機制至關重要。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="straddle"><span class="pdir">← 上一頁</span><span class="ptitle">買進跨式</span></div>
+        <div class="pbtn right" data-target="puregamma"><span class="pdir">下一頁 →</span><span class="ptitle">用期貨/個股 Long Gamma</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== PURE LONG GAMMA (FUTURES/STOCK HEDGE) ===================== -->
+    <div class="panel" id="p-puregamma">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>進階 01 / 02 · GAMMA SCALPING</div>
+        <h1>用期貨 / 個股做 Long Gamma<span class="symbol">DELTA-HEDGED LONG GAMMA</span></h1>
+        <p class="tagline">期貨與股票本身沒有 Gamma（它們的損益是直線，沒有凸性），所以「純做多 Gamma」一定要從選擇權取得，期貨/股票的角色是<b>動態沖銷 Delta</b>，把方向性風險歸零，只留下對「波動本身」的曝險。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">M</span>機制：為什麼期貨/股票能「純化」出 Gamma</h2>
+        <p>選擇權的 Delta 會隨股價移動而改變（這就是 Gamma），若你買進選擇權後完全不避險，部位同時帶有方向性風險（Delta）與波動性風險（Gamma），兩者混在一起。做法是：<b>用期貨或股票放空（或買進）等量的 Delta，讓淨 Delta 維持在 0 附近</b>，剩下的損益來源就只剩下「股價怎麼動」這件事本身 — 不管漲或跌，只要動得夠大，你就賺錢；不動，你就虧 Theta。這個操作俗稱「<b>Gamma Scalping（伽瑪刮頭皮）</b>」，是造市商與波動度交易者最核心的避險與獲利手法。</p>
+        <p class="muted">用期貨而非股票避險的好處：保證金效率高（不需付出股票全額本金）、放空不受借券限制、無股息調整問題；股票避險的好處則是流動性深、無到期日轉倉成本、和選擇權的標的完全一致（無基差風險）。指數選擇權常用期貨避險，個股選擇權則兩者皆可。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">L</span>建立部位</h2>
+        <div class="leg-row"><span class="tag long">買進 1 口 Call</span> 履約價 $100　權利金 $5　Delta 0.50　Gamma 0.06（每口=100股）</div>
+        <div class="leg-row"><span class="tag short">放空股票/期貨避險</span> 放空 50 股（= Delta 50 股當量）讓淨 Delta ≈ 0</div>
+        <p class="muted">之後每天股價一變動，Delta 會跟著 Gamma 改變，你就要重新調整避險部位的股數/口數 — 這個「<b>追著 Delta 調整避險</b>」的動作，就是把 Gamma 轉換成實現損益的過程。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>一週實戰示範（Gamma Scalping 損益拆解）</h2>
+        <p class="muted">近似公式：<b>每日 Gamma 損益 ≈ ½ × Gamma($) × (當日股價變動)²</b>，再扣掉每天固定的 Theta 成本（$5/天）。這正是「凸性換取時間價值」的具體數字呈現。</p>
+        <table>
+          <tr><th>交易日</th><th>開盤</th><th>收盤</th><th>ΔS</th><th>避險動作</th><th>Gamma 損益</th><th>Theta 成本</th><th>當日淨損益</th></tr>
+          <tr><td>週一</td><td>$100</td><td>$104</td><td>+4</td><td>追價放空 24 股 @104</td><td class="tag long" style="display:inline-flex">+$48</td><td>-$5</td><td class="tag long" style="display:inline-flex">+$43</td></tr>
+          <tr><td>週二</td><td>$104</td><td>$102</td><td>-2</td><td>回補 12 股 @102</td><td class="tag long" style="display:inline-flex">+$12</td><td>-$5</td><td class="tag long" style="display:inline-flex">+$7</td></tr>
+          <tr><td>週三</td><td>$102</td><td>$107</td><td>+5</td><td>追價放空 30 股 @107</td><td class="tag long" style="display:inline-flex">+$75</td><td>-$5</td><td class="tag long" style="display:inline-flex">+$70</td></tr>
+          <tr><td>週四</td><td>$107</td><td>$103</td><td>-4</td><td>回補 24 股 @103</td><td class="tag long" style="display:inline-flex">+$48</td><td>-$5</td><td class="tag long" style="display:inline-flex">+$43</td></tr>
+          <tr><td>週五</td><td>$103</td><td>$105</td><td>+2</td><td>追價放空 12 股 @105，收盤平倉</td><td class="tag long" style="display:inline-flex">+$12</td><td>-$5</td><td class="tag long" style="display:inline-flex">+$7</td></tr>
+        </table>
+        <div class="stat-strip" style="margin-top:14px;">
+          <div class="stat-cell"><div class="s-label">本週累積 Gamma 損益</div><div class="s-val pos">+$195</div></div>
+          <div class="stat-cell"><div class="s-label">本週累積 Theta 成本</div><div class="s-val neg">-$25</div></div>
+          <div class="stat-cell"><div class="s-label">淨損益（每口）</div><div class="s-val pos">+$170</div></div>
+          <div class="stat-cell"><div class="s-label">原始權利金成本</div><div class="s-val">$500</div></div>
+        </div>
+        <p class="muted" style="margin-top:10px;">關鍵觀察：股價週一到週五其實是「上下震盪、最終只小漲 $5」（$100→$105），如果你單純「買 Call 抱到週五不避險」，獲利只有約 $5×Delta ≈ $250 左右、再扣權利金大約打平；但透過<b>每天動態避險「逢高加空、逢低回補」</b>，把途中的來回震盪都鎖成實現損益，本週實際賺到的 Gamma 刮頭皮利潤是 $195，遠高於只靠最終漲跌方向能賺到的錢 — 這正是「純做多 Gamma」不在乎方向、只在乎<b>實現波動有多大</b>的精髓。</p>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>純 Long Gamma 策略的經濟本質，是在「<b>出售你對股價方向的判斷，換取對波動程度的判斷</b>」：透過期貨/股票把方向性歸零後，你不再需要猜對漲跌，只需要猜對「股價會不會劇烈跑來跑去」。你付出的代價是 Theta（時間價值），可以把它想成「為了保有這個一直重新避險、隨時準備刮頭皮獲利的權利，每天支付的租金」；只要市場「<b>實現波動度（Realized Volatility）大於你買進選擇權時隱含波動度所定價的水準</b>」，這筆交易在統計上就有正期望值。這是造市商每天在做的事 — 他們賣出選擇權給客戶後，會用期貨/股票動態避險來管理風險，而避險過程本身產生的損益，正是「實現波動 vs 隱含波動」之間價差的具體體現，也是整個選擇權市場定價效率的核心機制。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="strangle"><span class="pdir">← 上一頁</span><span class="ptitle">賣出勒式</span></div>
+        <div class="pbtn right" data-target="purevega"><span class="pdir">下一頁 →</span><span class="ptitle">用期貨/個股 Long Vega</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== PURE LONG VEGA (FUTURES/STOCK HEDGE) ===================== -->
+    <div class="panel" id="p-purevega">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>進階 02 / 02 · CALENDAR + DELTA HEDGE</div>
+        <h1>用期貨 / 個股做 Long Vega<span class="symbol">DELTA-HEDGED CALENDAR SPREAD</span></h1>
+        <p class="tagline">期貨與股票同樣<b>沒有 Vega</b>（它們的價格不受「隱含波動度」影響），所以期貨/股票永遠無法直接做多 Vega，角色一樣只是拿來沖銷 Delta；真正的 Vega 曝險必須來自選擇權本身，而「縱向價差（Calendar Spread）」是業界用來把 Vega 從 Gamma 中相對分離出來的標準做法。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">M</span>機制：為什麼用 Calendar Spread 而不是單純買一個 Call</h2>
+        <p>單純買一口 Call 並用股票/期貨避險 Delta（也就是上一頁的做法），會同時得到<b>正 Gamma + 正 Vega</b>，兩者綁在一起，無法只賺波動度上升的錢而不被股價亂動干擾。若改用「<b>買進長天期 ATM 選擇權 + 賣出短天期同履約價 ATM 選擇權</b>」（Calendar Spread）：長天期選擇權的 Vega 較大、Gamma 較小；短天期選擇權的 Vega 較小、Gamma 較大。兩者相減後，淨 Gamma 會被壓得很小（甚至略為負值），但淨 Vega 仍維持顯著正值 — 這樣建構出來的部位，對「股價亂動」相對不敏感，卻仍然高度暴露在「隱含波動度上升」之下，是更接近「<b>純粹做多波動度本身（IV）</b>」的結構。建好部位後，一樣用股票或期貨把殘餘的淨 Delta 沖銷掉。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">L</span>建立部位</h2>
+        <div class="leg-row"><span class="tag long">買進 60天期 Call</span> 履約價 $100　Delta 0.52　Gamma 0.025　Theta -0.025/天　Vega 0.16</div>
+        <div class="leg-row"><span class="tag short">賣出 14天期 Call</span> 履約價 $100　Delta 0.50　Gamma 0.065　Theta -0.060/天（賣方對我方為 +0.060）　Vega 0.07</div>
+        <div class="leg-row"><span class="tag neutral">股票/期貨避險</span> 淨 Delta 僅 0.02，放空約 2 股即可接近中性</div>
+        <table>
+          <tr><th>淨部位 Greeks</th><th>數值</th><th>意義</th></tr>
+          <tr><td>淨 Delta</td><td>0.02</td><td>幾乎不受方向影響</td></tr>
+          <tr><td>淨 Gamma</td><td>-0.040</td><td>股價劇烈亂動反而小幅不利（與上一頁策略相反）</td></tr>
+          <tr><td>淨 Theta</td><td>+0.035/天</td><td>時間流逝對我方有利（短腿衰退較快）</td></tr>
+          <tr><td>淨 Vega</td><td>+0.09</td><td>IV 每漲 1%，部位賺 $9（每口）</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>一週實戰示範：財報前 IV 攀升，股價盤整</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          股票本週因為下週即將公布財報，股價在 $98～$102 之間窄幅盤整（波動很小），但市場對財報的恐慌情緒讓隱含波動度從 25% 一路墊高到 30%。
+        </div>
+        <table>
+          <tr><th>項目</th><th>計算</th><th>本週損益（每口）</th></tr>
+          <tr><td>Vega 損益</td><td>淨 Vega 0.09 × IV 上升 5 點 × 100股</td><td class="tag long" style="display:inline-flex">+$45.00</td></tr>
+          <tr><td>Theta 損益</td><td>淨 Theta +0.035/天 × 5天 × 100股</td><td class="tag long" style="display:inline-flex">+$17.50</td></tr>
+          <tr><td>Gamma 損益（小幅盤整的代價）</td><td>淨 Gamma -0.04 × 股價小幅震盪 × 100股</td><td class="tag short" style="display:inline-flex">-$10.00</td></tr>
+          <tr><td><b>本週淨損益</b></td><td></td><td class="tag long" style="display:inline-flex">+$52.50</td></tr>
+        </table>
+        <p class="muted">注意股價幾乎沒有方向性變化（$100 附近窄幅整理），獲利幾乎完全來自 <b>Vega（IV 上升）與 Theta（淨收租）</b>，而不是靠股價亂動的 Gamma 刮頭皮 — 這正驗證了 Calendar Spread 在實務上被當成「<b>對隱含波動度本身的純粹押注</b>」的工具：你賭的是「市場對未來不確定性的『定價』會提高」，而不是賭「股價實際會動多大」。</p>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>純 Long Vega 策略賭的不是股價本身的走勢，也不完全是股價的實際波動，而是「<b>市場對未來不確定性的定價會不會提高</b>」— 也就是隱含波動度（IV）本身的漲跌。這在經濟上對應到真實世界的「不確定性溢酬」：財報、選舉、央行決策、地緣政治風險逼近時，即使股價現在風平浪靜，整個市場願意為「未來可能的劇烈變化」支付更高的保費，選擇權價格（尤其長天期）就會被推升，這就是 Vega 部位的獲利來源。用期貨/股票沖銷 Delta、用 Calendar Spread 壓低 Gamma，本質上是把選擇權部位中「方向」與「短期亂動」的雜訊盡量濾掉，留下一個更乾淨的「<b>對總體不確定性程度本身</b>」的曝險，這也是法人在波動度交易（Volatility Trading）中，用來與「實現波動度交易（Gamma Scalping）」做區隔、甚至互相對沖的核心工具。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="puregamma"><span class="pdir">← 上一頁</span><span class="ptitle">用期貨/個股 Long Gamma</span></div>
+        <div class="pbtn right" data-target="purevol"><span class="pdir">下一頁 →</span><span class="ptitle">用期貨/個股 Long Vol</span></div>
+      </div>
+    </div>
+
+    <!-- ===================== PURE LONG VOL (GAMMA + VEGA COMBINED) ===================== -->
+    <div class="panel" id="p-purevol">
+      <div class="panel-header">
+        <div class="eyebrow"><span class="bar"></span>進階 03 / 03 · STRADDLE + DELTA HEDGE</div>
+        <h1>用期貨 / 個股做 Long Vol<span class="symbol">TOTAL VOLATILITY EXPOSURE</span></h1>
+        <p class="tagline">「波動度」其實有兩種：股價<b>實際上下亂動的幅度</b>（Realized Vol，由 Gamma 賺到）與市場<b>對未來波動的預期定價</b>（Implied Vol，由 Vega 賺到）。「Long Vol」就是同時擁有 Gamma 與 Vega，兩種波動度收入一起賺，再用期貨/個股把唯一不想要的方向性風險（Delta）沖銷掉。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">M</span>機制：Long Vol = Long Gamma + Long Vega，用期貨/個股只洗掉 Delta</h2>
+        <p>前兩頁分別示範了「盡量只留 Gamma（單腿 Call+避險）」與「盡量只留 Vega（Calendar Spread+避險）」，這是把波動度拆開來看的教學示範。但實務上最常見、最直覺的「做多波動度」交易，其實是不刻意拆分，直接<b>買進 ATM 跨式（Long Straddle：Call+Put）</b>，因為這樣 Gamma 和 Vega 都拿好拿滿、且 Delta 天生接近 0，幾乎不用怎麼避險；剩下殘餘的一點點 Delta，再用股票或期貨微調即可。這個部位賺錢的方式有兩條路：① 股價實際上下亂動幅度夠大（吃到 Gamma）、② 市場恐慌情緒升溫、IV 被往上推（吃到 Vega），兩者只要任一發生就能獲利，同時發生則是雙重收穫。代價同樣是 Theta — 每天固定流失的時間價值，是你持有這個「全方位波動度保單」必須支付的租金。</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">L</span>建立部位</h2>
+        <div class="leg-row"><span class="tag long">買進 Call</span> 履約價 $100　權利金 $5　Delta 0.50　Gamma 0.06　Theta -0.05/天　Vega 0.12</div>
+        <div class="leg-row"><span class="tag long">買進 Put</span> 履約價 $100　權利金 $5　Delta -0.50　Gamma 0.06　Theta -0.05/天　Vega 0.12</div>
+        <div class="leg-row"><span class="tag neutral">期貨/股票避險</span> 淨 Delta ≈ 0，僅需依股價偏移做極小幅微調</div>
+        <table>
+          <tr><th>淨部位 Greeks（每口）</th><th>數值</th><th>意義</th></tr>
+          <tr><td>淨 Delta</td><td>≈ 0.00</td><td>對方向幾乎中性，幾乎不用避險</td></tr>
+          <tr><td>淨 Gamma</td><td>0.12</td><td>實際波動越大，賺越多（不論漲跌）</td></tr>
+          <tr><td>淨 Theta</td><td>-0.10/天</td><td>每天固定的持有成本</td></tr>
+          <tr><td>淨 Vega</td><td>0.24</td><td>IV 每漲 1%，部位賺 $24（每口）</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-sq">例</span>一週實戰示範：股價亂動 + IV 同步攀升</h2>
+        <div class="example">
+          <div class="ex-label">情境</div>
+          市場傳出下週可能有重大政策公布，本週股價本身就劇烈震盪（與「用期貨/個股 Long Gamma」同一組價格路徑），同時市場恐慌情緒也讓 IV 從 25% 同步墊高到 30%。
+        </div>
+        <table>
+          <tr><th>交易日</th><th>開盤</th><th>收盤</th><th>ΔS</th><th>Gamma 損益</th></tr>
+          <tr><td>週一</td><td>$100</td><td>$104</td><td>+4</td><td class="tag long" style="display:inline-flex">+$96</td></tr>
+          <tr><td>週二</td><td>$104</td><td>$102</td><td>-2</td><td class="tag long" style="display:inline-flex">+$24</td></tr>
+          <tr><td>週三</td><td>$102</td><td>$107</td><td>+5</td><td class="tag long" style="display:inline-flex">+$150</td></tr>
+          <tr><td>週四</td><td>$107</td><td>$103</td><td>-4</td><td class="tag long" style="display:inline-flex">+$96</td></tr>
+          <tr><td>週五</td><td>$103</td><td>$105</td><td>+2</td><td class="tag long" style="display:inline-flex">+$24</td></tr>
+        </table>
+        <div class="stat-strip" style="margin-top:14px;">
+          <div class="stat-cell"><div class="s-label">本週累積 Gamma 損益</div><div class="s-val pos">+$390</div></div>
+          <div class="stat-cell"><div class="s-label">本週累積 Theta 成本</div><div class="s-val neg">-$50</div></div>
+          <div class="stat-cell"><div class="s-label">Vega 損益（IV 25%→30%）</div><div class="s-val pos">+$120</div></div>
+          <div class="stat-cell"><div class="s-label">本週淨損益（每口）</div><div class="s-val pos">+$460</div></div>
+        </div>
+        <p class="muted" style="margin-top:10px;">把這頁跟前兩頁對照：單純 Long Gamma（避險 Call）那一頁同樣的價格路徑只賺了 $170；這裡用跨式同時持有 Gamma 與 Vega，光 Gamma 部分就因為部位放大一倍而賺到 $390，再加上 IV 同步上升額外貢獻的 $120 Vega 損益，扣掉雙倍的 Theta 成本 $50 後，淨賺 $460 — 遠高於只賺單一種波動度。這就是「Long Vol」的精髓：<b>不挑波動的來源，股價亂動也好、市場恐慌也好，兩種波動度收入一起收</b>。</p>
+      </div>
+
+      <div class="econ-box">
+        <div class="econ-title">經濟意涵</div>
+        <p>「Long Vol」交易者本質上是在向市場銷售一份「<b>萬用不確定性保險</b>」的相反方— 他們不是出售保險的人，而是用權利金「買進」對不確定性的曝險，並用期貨/個股把唯一不想要的部分（方向）濾掉，只留下「世界變得更不確定」這件事本身的純粹收益來源。經濟上，這對應到「<b>波動度風險溢酬（Volatility Risk Premium）</b>」的另一面：市場上多數時候，賣方（出售保險者）因為承擔尾端風險而長期享有正期望值，但在<b>實現波動真正超出市場原先定價</b>的少數時刻（如金融危機、政策意外、地緣衝突），買方（Long Vol）會獲得巨大、不對稱的回報。專業波動度交易台正是靠著用期貨/個股把方向性風險完全剝離，讓部位變成一個「對總體不確定性程度」最純粹的曝險工具，再透過嚴格控制 Theta 持有成本與部位規模，等待市場真正劇烈變動的時刻獲取超額報酬，這也是為什麼長期持有的 Long Vol 部位常被視為一種「尾端風險避險（Tail Hedge）」，用來對沖投資組合中其他部位在極端行情下的虧損。</p>
+      </div>
+
+      <div class="pager">
+        <div class="pbtn" data-target="purevega"><span class="pdir">← 上一頁</span><span class="ptitle">用期貨/個股 Long Vega</span></div>
+        <div class="pbtn right" data-target="intro"><span class="pdir">回到開頭 →</span><span class="ptitle">選擇權是什麼</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============ Navigation ============ */
+const navItems = document.querySelectorAll('.nav-item, .pbtn');
+function goTo(target){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p-'+target).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.target===target));
+  document.querySelector('.main').scrollTo({top:0});
+  window.scrollTo({top:0, behavior:'instant'});
+  document.getElementById('sidebar').classList.remove('open');
+  // 重新繪製該頁的圖表（先前因為 display:none 寬度量到 0，圖會被壓扁）
+  requestAnimationFrame(()=> redrawPanel(target));
+}
+
+function redrawPanel(target){
+  if(target==='buycall') recalcBasic('bc','call','long');
+  else if(target==='sellcall') recalcBasic('sc','call','short');
+  else if(target==='buyput') recalcBasic('bp','put','long');
+  else if(target==='sellput') recalcBasic('sp','put','short');
+  else if(target==='playground') updatePlayground();
+  else if(['bullcall','bearput','straddle','strangle'].includes(target)) drawStrategies();
+}
+navItems.forEach(el=>{
+  el.addEventListener('click', ()=> goTo(el.dataset.target));
+});
+document.getElementById('menuToggle').addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+/* ============ Canvas payoff chart helper ============ */
+function setupCanvas(canvas){
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const w = canvas.parentElement.clientWidth - 20;
+  canvas.width = w*dpr; canvas.height = (canvas.height||260)*dpr;
+  canvas.style.width = w+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  return {ctx, w, h: canvas.height/dpr};
+}
+
+function drawPayoff(canvasId, legs, opts){
+  opts = opts || {};
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const h0 = canvas.getAttribute('data-h') || 260;
+  canvas.height = h0;
+  const {ctx, w, h} = setupCanvas(canvas);
+  ctx.clearRect(0,0,w,h);
+
+  const padL=46, padR=14, padT=14, padB=28;
+  const plotW = w-padL-padR, plotH = h-padT-padB;
+
+  const strikes = legs.map(l=>l.strike);
+  const minK = Math.min(...strikes), maxK = Math.max(...strikes);
+  const range = Math.max(maxK-minK, 20);
+  const xMin = minK - range*0.9 - 5;
+  const xMax = maxK + range*0.9 + 5;
+
+  function payoffAt(S){
+    let total = 0;
+    legs.forEach(l=>{
+      let intrinsic = l.type==='call' ? Math.max(S-l.strike,0) : Math.max(l.strike-S,0);
+      let val = (intrinsic - l.premium) * (l.position==='long'?1:-1);
+      total += val;
+    });
+    return total;
+  }
+
+  const N=200;
+  let pts=[];
+  let minY=Infinity, maxY=-Infinity;
+  for(let i=0;i<=N;i++){
+    const S = xMin + (xMax-xMin)*i/N;
+    const y = payoffAt(S);
+    pts.push([S,y]);
+    if(y<minY) minY=y;
+    if(y>maxY) maxY=y;
+  }
+  const yPad = Math.max((maxY-minY)*0.15, 2);
+  minY -= yPad; maxY += yPad;
+  if(minY>0) minY=-2;
+  if(maxY<0) maxY=2;
+
+  function px(S){ return padL + (S-xMin)/(xMax-xMin)*plotW; }
+  function py(y){ return padT + (maxY-y)/(maxY-minY)*plotH; }
+
+  // grid
+  ctx.strokeStyle = '#2a2e39';
+  ctx.lineWidth=1;
+  ctx.font = '10px IBM Plex Mono, monospace';
+  ctx.fillStyle = '#787b86';
+  const gridLinesY = 4;
+  for(let i=0;i<=gridLinesY;i++){
+    const y = minY + (maxY-minY)*i/gridLinesY;
+    const yy = py(y);
+    ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(w-padR,yy); ctx.stroke();
+    ctx.fillText(y.toFixed(0), 4, yy+3);
+  }
+  const gridLinesX=5;
+  for(let i=0;i<=gridLinesX;i++){
+    const S = xMin + (xMax-xMin)*i/gridLinesX;
+    const xx = px(S);
+    ctx.beginPath(); ctx.moveTo(xx,padT); ctx.lineTo(xx,h-padB); ctx.stroke();
+    ctx.fillText(S.toFixed(0), xx-10, h-10);
+  }
+
+  // zero line
+  const zy = py(0);
+  ctx.strokeStyle = '#434651';
+  ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(padL,zy); ctx.lineTo(w-padR,zy); ctx.stroke();
+
+  // fill profit/loss areas
+  ctx.beginPath();
+  ctx.moveTo(px(pts[0][0]), zy);
+  pts.forEach(p=> ctx.lineTo(px(p[0]), py(p[1])) );
+  ctx.lineTo(px(pts[pts.length-1][0]), zy);
+  ctx.closePath();
+  // gradient won't separate profit/loss simply; do per-segment fill instead
+  ctx.save();
+  ctx.clip();
+  for(let i=0;i<pts.length-1;i++){
+    const x1=px(pts[i][0]), x2=px(pts[i+1][0]);
+    const y1=py(pts[i][1]), y2=py(pts[i+1][1]);
+    const avg=(pts[i][1]+pts[i+1][1])/2;
+    ctx.fillStyle = avg>=0 ? 'rgba(8,153,129,0.15)' : 'rgba(242,54,69,0.15)';
+    const top = Math.min(y1,y2,zy);
+    const bottom = Math.max(y1,y2,zy);
+    ctx.fillRect(x1, top, x2-x1+1, bottom-top);
+  }
+  ctx.restore();
+
+  // line
+  ctx.beginPath();
+  for(let i=0;i<pts.length;i++){
+    const xx=px(pts[i][0]), yy=py(pts[i][1]);
+    if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+  }
+  ctx.strokeStyle = '#2962ff';
+  ctx.lineWidth=2.4;
+  ctx.lineJoin='round';
+  ctx.stroke();
+
+  // strike markers
+  legs.forEach(l=>{
+    const xx = px(l.strike);
+    ctx.strokeStyle = '#ffb800';
+    ctx.setLineDash([3,3]);
+    ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(xx,padT); ctx.lineTo(xx,h-padB); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  return {payoffAt, xMin, xMax};
+}
+
+function recalcBasic(prefix, type, position){
+  const k = +document.getElementById(prefix+'_k').value;
+  const p = +document.getElementById(prefix+'_p').value;
+  document.getElementById(prefix+'_k_val').textContent = k;
+  document.getElementById(prefix+'_p_val').textContent = p;
+  drawPayoff('chart_'+({bc:'buycall',sc:'sellcall',bp:'buyput',sp:'sellput'}[prefix]), [{type,position,strike:k,premium:p}]);
+
+  if(prefix==='bc'){
+    document.getElementById('bc_be').textContent=(k+p).toFixed(2);
+    document.getElementById('bc_maxloss').textContent='-'+p.toFixed(2);
+  } else if(prefix==='sc'){
+    document.getElementById('sc_be').textContent=(k+p).toFixed(2);
+    document.getElementById('sc_maxgain').textContent='+'+p.toFixed(2);
+  } else if(prefix==='bp'){
+    document.getElementById('bp_be').textContent=(k-p).toFixed(2);
+    document.getElementById('bp_maxloss').textContent='-'+p.toFixed(2);
+    document.getElementById('bp_maxgain').textContent='+'+(k-p).toFixed(2);
+  } else if(prefix==='sp'){
+    document.getElementById('sp_be').textContent=(k-p).toFixed(2);
+    document.getElementById('sp_maxgain').textContent='+'+p.toFixed(2);
+    document.getElementById('sp_maxloss').textContent='-'+(k-p).toFixed(2);
+  }
+}
+
+[['bc','call','long'],['sc','call','short'],['bp','put','long'],['sp','put','short']].forEach(([prefix,type,position])=>{
+  ['_k','_p'].forEach(suf=>{
+    document.getElementById(prefix+suf).addEventListener('input', ()=>recalcBasic(prefix,type,position));
+  });
+});
+
+/* ============ Static strategy diagrams ============ */
+function drawStrategies(){
+  drawPayoff('chart_bullcall', [
+    {type:'call',position:'long',strike:100,premium:6},
+    {type:'call',position:'short',strike:110,premium:2}
+  ]);
+  drawPayoff('chart_bearput', [
+    {type:'put',position:'long',strike:100,premium:6},
+    {type:'put',position:'short',strike:90,premium:2}
+  ]);
+  drawPayoff('chart_straddle', [
+    {type:'call',position:'long',strike:100,premium:5},
+    {type:'put',position:'long',strike:100,premium:5}
+  ]);
+  drawPayoff('chart_strangle', [
+    {type:'call',position:'short',strike:110,premium:3},
+    {type:'put',position:'short',strike:90,premium:3}
+  ]);
+}
+
+/* ============ Black-Scholes for playground ============ */
+function erf(x){
+  const sign = x<0?-1:1; x=Math.abs(x);
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const t=1/(1+p*x);
+  const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return sign*y;
+}
+function ncdf(x){ return 0.5*(1+erf(x/Math.sqrt(2))); }
+function npdf(x){ return Math.exp(-x*x/2)/Math.sqrt(2*Math.PI); }
+
+function blackScholes(S,K,T,r,sigma,type){
+  if(T<=0) T=0.0007;
+  if(sigma<=0) sigma=0.001;
+  const d1 = (Math.log(S/K) + (r + sigma*sigma/2)*T) / (sigma*Math.sqrt(T));
+  const d2 = d1 - sigma*Math.sqrt(T);
+  let price, delta, rho;
+  if(type==='call'){
+    price = S*ncdf(d1) - K*Math.exp(-r*T)*ncdf(d2);
+    delta = ncdf(d1);
+    rho = K*T*Math.exp(-r*T)*ncdf(d2)/100;
+  } else {
+    price = K*Math.exp(-r*T)*ncdf(-d2) - S*ncdf(-d1);
+    delta = ncdf(d1)-1;
+    rho = -K*T*Math.exp(-r*T)*ncdf(-d2)/100;
+  }
+  const gamma = npdf(d1)/(S*sigma*Math.sqrt(T));
+  const vega = S*npdf(d1)*Math.sqrt(T)/100;
+  const theta = type==='call'
+    ? (-(S*npdf(d1)*sigma)/(2*Math.sqrt(T)) - r*K*Math.exp(-r*T)*ncdf(d2))/365
+    : (-(S*npdf(d1)*sigma)/(2*Math.sqrt(T)) + r*K*Math.exp(-r*T)*ncdf(-d2))/365;
+  return {price, delta, gamma, theta, vega, rho};
+}
+
+let pgType='call';
+document.querySelectorAll('[data-pg-type]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-pg-type]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    pgType = btn.dataset.pgType;
+    updatePlayground();
+  });
+});
+
+function updatePlayground(){
+  const S = +document.getElementById('pg_s').value;
+  const K = +document.getElementById('pg_k').value;
+  const sigma = +document.getElementById('pg_v').value/100;
+  const days = +document.getElementById('pg_t').value;
+  const r = +document.getElementById('pg_r').value/100;
+  const T = days/365;
+
+  document.getElementById('pg_s_val').textContent = S;
+  document.getElementById('pg_k_val').textContent = K;
+  document.getElementById('pg_v_val').textContent = (sigma*100).toFixed(0)+'%';
+  document.getElementById('pg_t_val').textContent = days+' 天';
+  document.getElementById('pg_r_val').textContent = (r*100).toFixed(0)+'%';
+
+  const g = blackScholes(S,K,T,r,sigma,pgType);
+  document.getElementById('pg_price').textContent = g.price.toFixed(2);
+  document.getElementById('pg_delta').textContent = g.delta.toFixed(3);
+  document.getElementById('pg_gamma').textContent = g.gamma.toFixed(4);
+  document.getElementById('pg_theta').textContent = g.theta.toFixed(3);
+  document.getElementById('pg_vega').textContent = g.vega.toFixed(3);
+  document.getElementById('pg_rho').textContent = g.rho.toFixed(3);
+
+  drawPGChart(S,K,T,r,sigma,pgType);
+}
+
+function drawPGChart(S,K,T,r,sigma,type){
+  const canvas = document.getElementById('chart_playground');
+  canvas.height = 240;
+  const {ctx,w,h} = setupCanvas(canvas);
+  ctx.clearRect(0,0,w,h);
+  const padL=46,padR=14,padT=14,padB=28;
+  const plotW=w-padL-padR, plotH=h-padT-padB;
+  const xMin = Math.max(K*0.5, S*0.5, 20);
+  const xMax = K*1.6 + S*0.2;
+  const N=150;
+  let pts=[]; let maxY=0;
+  for(let i=0;i<=N;i++){
+    const s = xMin+(xMax-xMin)*i/N;
+    const pr = blackScholes(s,K,T,r,sigma,type).price;
+    pts.push([s,pr]);
+    if(pr>maxY) maxY=pr;
+  }
+  maxY*=1.15;
+  function px(x){ return padL+(x-xMin)/(xMax-xMin)*plotW; }
+  function py(y){ return padT+(maxY-y)/maxY*plotH; }
+
+  ctx.strokeStyle='#2a2e39'; ctx.lineWidth=1; ctx.font='10px IBM Plex Mono,monospace'; ctx.fillStyle='#787b86';
+  for(let i=0;i<=4;i++){
+    const y=maxY*i/4, yy=py(y);
+    ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(w-padR,yy); ctx.stroke();
+    ctx.fillText(y.toFixed(1),4,yy+3);
+  }
+  for(let i=0;i<=5;i++){
+    const x=xMin+(xMax-xMin)*i/5, xx=px(x);
+    ctx.beginPath(); ctx.moveTo(xx,padT); ctx.lineTo(xx,h-padB); ctx.stroke();
+    ctx.fillText(x.toFixed(0), xx-10, h-10);
+  }
+
+  ctx.beginPath();
+  pts.forEach((p,i)=>{ const xx=px(p[0]),yy=py(p[1]); if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); });
+  ctx.strokeStyle='#9db4ff'; ctx.lineWidth=2.2; ctx.stroke();
+
+  // spot marker
+  const sx = px(S);
+  ctx.strokeStyle='#2962ff'; ctx.setLineDash([4,4]); ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(sx,padT); ctx.lineTo(sx,h-padB); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // strike marker
+  const kx = px(K);
+  ctx.strokeStyle='#ffb800'; ctx.setLineDash([3,3]); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(kx,padT); ctx.lineTo(kx,h-padB); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+['pg_s','pg_k','pg_v','pg_t','pg_r'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updatePlayground);
+});
+
+/* ============ init ============ */
+function initAll(){
+  recalcBasic('bc','call','long');
+  recalcBasic('sc','call','short');
+  recalcBasic('bp','put','long');
+  recalcBasic('sp','put','short');
+  drawStrategies();
+  updatePlayground();
+}
+window.addEventListener('load', initAll);
+window.addEventListener('resize', ()=>{ initAll(); });
+</script>
+</body>
+</html>
